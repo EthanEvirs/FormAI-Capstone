@@ -22,7 +22,7 @@ PICK= pygame.mixer.Sound("Pick.mp3")
 START = pygame.mixer.Sound("START.mp3")
 
 #IMAGES
-STARTLOGO = pygame.image.load("MAINLOGO.jpeg")
+STARTLOGO = pygame.image.load("MAINLOGOUPDATE.png")
 BACKGROUND = pygame.image.load("background.jpeg")
 LOGO = pygame.image.load("formai.png").convert_alpha()
 BUTTON1 = pygame.image.load("BicepCurl1.png").convert_alpha()
@@ -60,6 +60,7 @@ def show_start_menu():
                     pygame.mixer.music.stop()
                     pygame.time.delay(2000)
                     return 
+            
 
 show_start_menu()
 pygame.mixer.music.load("MENU.mp3")
