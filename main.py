@@ -3,6 +3,12 @@ import math
 import button
 from button import Button
 import os
+import cv2
+import mediapipe as mp
+import numpy as np
+from camera import Camera
+
+
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 
@@ -21,6 +27,8 @@ OPENSOUND = pygame.mixer.Sound("open.wav")
 PICK= pygame.mixer.Sound("Pick.mp3")
 START = pygame.mixer.Sound("START.mp3")
 TEXT = pygame.mixer.Sound("text.wav")
+# VICTORY = pygame.mixer.Sound("WIN.mp3")
+# VICTORY2 = pygame.mixer.Sound("WIN2.mp3")
 
 #IMAGES
 STARTLOGO = pygame.image.load("MAINLOGOUPDATE.png")
@@ -127,6 +135,8 @@ def military_press_cutscene():
             pygame.mixer.music.load("MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
+            # pygame.mixer.Sound.set_volume(VICTORY, 0.5)
+            # pygame.mixer.Sound.play(VICTORY)
             return
 
         pygame.display.flip()
@@ -195,10 +205,15 @@ def bicep_curl_cutscene():
                 line_surface = font.render(line, True, (0, 0, 0))
                 screen.blit(line_surface, (rect_x + 5, rect_y + 5 + i * font.get_height()))
         else:
+            
             pygame.mixer.music.stop()
+            start_bicep_curl_pose()
             pygame.mixer.music.load("MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
+            # pygame.mixer.Sound.set_volume(VICTORY2, 0.5)
+            # pygame.mixer.Sound.play(VICTORY2)
+            
             return
     
         pygame.display.flip()
@@ -213,6 +228,68 @@ def bicep_curl_cutscene():
                     space_press_count += 1  # Only increment by 1
                     pygame.mixer.Sound.set_volume(TEXT, 0.8)
                     pygame.mixer.Sound.play(TEXT)
+                    
+def start_bicep_curl_pose():
+    pygame.mixer.music.load("CAMERA.mp3")
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
+    camera = Camera()
+    mp_pose = mp.solutions.pose
+    pose = mp_pose.Pose()
+
+    screen = pygame.display.set_mode((800, 600))  # Resize to fit both preview + camera
+    pygame.display.set_caption("Bicep Curl Tracker")
+
+    font = pygame.font.SysFont(None, 36)
+
+    def draw_text(surface, text, pos, color=(255, 255, 255)):
+        img = font.render(text, True, color)
+        surface.blit(img, pos)
+
+    running = True
+    while running:
+        ret, frame = camera.cam.read()
+        if not ret:
+            break
+
+        frame = cv2.flip(frame, 1)
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(rgb_frame)
+
+        # Blank preview image
+        pose_preview = np.zeros((480, 480, 3), dtype=np.uint8)
+
+        if results.pose_landmarks:
+            mp.solutions.drawing_utils.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            mp.solutions.drawing_utils.draw_landmarks(pose_preview, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_rgb = np.rot90(frame_rgb)
+        frame_surface = pygame.surfarray.make_surface(frame_rgb)
+        frame_surface = pygame.transform.scale(frame_surface, (400, 400))
+
+        preview_rgb = cv2.cvtColor(pose_preview, cv2.COLOR_BGR2RGB)
+        preview_rgb = np.rot90(preview_rgb)
+        preview_surface = pygame.surfarray.make_surface(preview_rgb)
+        preview_surface = pygame.transform.scale(preview_surface, (200, 200))
+
+        screen.fill((128, 0, 128))  # Purple background
+        screen.blit(preview_surface, (25, 50))
+        screen.blit(frame_surface, (250, 50))
+        draw_text(screen, "ESC to exit", (50, 470))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            return
+
+    camera.release()
+    pygame.display.set_mode((400, 400))  # Reset window size when done
 
 
 show_start_menu()
