@@ -27,8 +27,8 @@ OPENSOUND = pygame.mixer.Sound("open.wav")
 PICK= pygame.mixer.Sound("Pick.mp3")
 START = pygame.mixer.Sound("START.mp3")
 TEXT = pygame.mixer.Sound("text.wav")
-# VICTORY = pygame.mixer.Sound("WIN.mp3")
-# VICTORY2 = pygame.mixer.Sound("WIN2.mp3")
+VICTORY = pygame.mixer.Sound("WIN.mp3")
+VICTORY2 = pygame.mixer.Sound("WIN2.mp3")
 
 #IMAGES
 STARTLOGO = pygame.image.load("MAINLOGOUPDATE.png")
@@ -44,8 +44,8 @@ BUTTON6 = pygame.image.load("FrontRaise2.png").convert_alpha()
 #CHARACTER
 MILSTANDING1 = pygame.image.load("mil1.jpeg").convert_alpha()
 MILSTANDING2 = pygame.image.load("mil2.jpeg").convert_alpha()
-REDSTANDING1 = pygame.image.load("red2.jpeg").convert_alpha()
-REDSTANDING2 = pygame.image.load("red2.jpeg").convert_alpha()
+REDSTANDING1 = pygame.image.load("redd.jpeg").convert_alpha()
+REDSTANDING2 = pygame.image.load("redd.jpeg").convert_alpha()
 
 
 
@@ -135,8 +135,8 @@ def military_press_cutscene():
             pygame.mixer.music.load("MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
-            # pygame.mixer.Sound.set_volume(VICTORY, 0.5)
-            # pygame.mixer.Sound.play(VICTORY)
+            pygame.mixer.Sound.set_volume(VICTORY, 0.5)
+            pygame.mixer.Sound.play(VICTORY)
             return
 
         pygame.display.flip()
@@ -211,8 +211,8 @@ def bicep_curl_cutscene():
             pygame.mixer.music.load("MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
-            # pygame.mixer.Sound.set_volume(VICTORY2, 0.5)
-            # pygame.mixer.Sound.play(VICTORY2)
+            pygame.mixer.Sound.set_volume(VICTORY2, 0.5)
+            pygame.mixer.Sound.play(VICTORY2)
             
             return
     
@@ -266,7 +266,8 @@ def start_bicep_curl_pose():
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_rgb = np.rot90(frame_rgb)
         frame_surface = pygame.surfarray.make_surface(frame_rgb)
-        frame_surface = pygame.transform.scale(frame_surface, (400, 400))
+        #                                                       W    H 
+        frame_surface = pygame.transform.scale(frame_surface, (400, 300))
 
         preview_rgb = cv2.cvtColor(pose_preview, cv2.COLOR_BGR2RGB)
         preview_rgb = np.rot90(preview_rgb)
@@ -286,6 +287,7 @@ def start_bicep_curl_pose():
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
+            screen = pygame.display.set_mode((400, 400))
             return
 
     camera.release()
