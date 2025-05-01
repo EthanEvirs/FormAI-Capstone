@@ -1,6 +1,6 @@
 import pygame
 pygame.mixer.init()
-selection = pygame.mixer.Sound("button.wav")
+selection = pygame.mixer.Sound("Sounds/button.wav")
 
 class Button:
     def __init__(self, x, y, image, scale, hover_image=None):

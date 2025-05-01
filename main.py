@@ -8,11 +8,8 @@ import mediapipe as mp
 import numpy as np
 from camera import Camera
 
-#supervised learning model 
-
-
+#supervised learning model
 os.environ['SDL_VIDEO_CENTERED'] = '1'
-
 
 # pygame setup
 pygame.init()
@@ -25,10 +22,10 @@ running = True
 pygame.display.set_caption("FORM-AI")
 pygame.mixer.init()
 #SOUNDS
-OPENSOUND = pygame.mixer.Sound("open.wav")
-PICK= pygame.mixer.Sound("Pick.mp3")
-START = pygame.mixer.Sound("START.mp3")
-TEXT = pygame.mixer.Sound("text.wav")
+OPENSOUND = pygame.mixer.Sound("Sounds/open.wav")
+PICK= pygame.mixer.Sound("Sounds/Pick.mp3")
+START = pygame.mixer.Sound("Sounds/START.mp3")
+TEXT = pygame.mixer.Sound("Sounds/text.wav")
 # VICTORY = pygame.mixer.Sound("WIN.mp3")
 # VICTORY2 = pygame.mixer.Sound("WIN2.mp3")
 
@@ -40,24 +37,24 @@ def load_and_scale(path, scale=2):
     return pygame.transform.scale(img, (int(img_width * scale), int(img_height * scale)))
 
 #IMAGES
-INTROBACKGROUND = load_and_scale("INTROBACKGROUND.jpeg")
-STARTLOGO = load_and_scale("MAINLOGOUPDATE.png")
-BACKGROUND = load_and_scale("background.jpeg")
-LOGO = load_and_scale("formai.png")
-BUTTON1 = load_and_scale("BicepCurl1.png")
-BUTTON2 = load_and_scale("BicepCurl2.png")
-BUTTON3 = load_and_scale("MilitaryPress2.png")
-BUTTON4 = load_and_scale("MilitaryPress3.png")
-BUTTON5 = load_and_scale("FrontRaise1.png")
-BUTTON6 = load_and_scale("FrontRaise2.png")
+INTROBACKGROUND = load_and_scale("Resource/INTROBACKGROUND.jpeg")
+STARTLOGO = load_and_scale("Resource/MAINLOGOUPDATE.png")
+BACKGROUND = load_and_scale("Resource/background.jpeg")
+LOGO = load_and_scale("Resource/formai.png")
+BUTTON1 = load_and_scale("Resource/BicepCurl1.png")
+BUTTON2 = load_and_scale("Resource/BicepCurl2.png")
+BUTTON3 = load_and_scale("Resource/MilitaryPress2.png")
+BUTTON4 = load_and_scale("Resource/MilitaryPress3.png")
+BUTTON5 = load_and_scale("Resource/FrontRaise1.png")
+BUTTON6 = load_and_scale("Resource/FrontRaise2.png")
 
 # CHARACTER
-MILSTANDING1 = load_and_scale("mil1.jpeg")
-MILSTANDING2 = load_and_scale("mil2.jpeg")
-REDSTANDING1 = load_and_scale("redd.jpeg")
-REDSTANDING2 = load_and_scale("redd.jpeg")
-LUSTANDING1 = load_and_scale("raises1.jpeg")
-LUSTANDING2 = load_and_scale("raises2.jpeg")
+MILSTANDING1 = load_and_scale("Resource/mil1.jpeg")
+MILSTANDING2 = load_and_scale("Resource/mil2.jpeg")
+REDSTANDING1 = load_and_scale("Resource/redd.jpeg")
+REDSTANDING2 = load_and_scale("Resource/redd.jpeg")
+LUSTANDING1 = load_and_scale("Resource/raises1.jpeg")
+LUSTANDING2 = load_and_scale("Resource/raises2.jpeg")
 
 
 center_x = (800 - BUTTON1.get_width()) // 2
@@ -71,7 +68,7 @@ tiles = math.ceil(width / BACKGROUND.get_width()) + 1
 
 
 def show_start_menu():
-    pygame.mixer.music.load("INTRO.mp3")
+    pygame.mixer.music.load("Sounds/INTRO.mp3")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
 
@@ -95,11 +92,11 @@ def show_start_menu():
 
 def front_raise_curscene():
     pygame.mixer.music.stop()
-    pygame.mixer.music.load("girl.mp3")
+    pygame.mixer.music.load("Sounds/girl.mp3")
     pygame.mixer.music.set_volume(0.3)
     pygame.mixer.music.play(-1)
 
-    font = pygame.font.Font("pictochat.otf", 48)
+    font = pygame.font.Font("Fonts/pictochat.otf", 48)
     messages = [
         "HIIIIIIIIIIIII <3",
         "I CAN'T WAIT TO GET A WORKOUT IN WITH YOU <3",
@@ -145,7 +142,7 @@ def front_raise_curscene():
         else:
             pygame.mixer.music.stop()
             start_front_raise_pose(shared_camera, shared_mp_pose)
-            pygame.mixer.music.load("MENU.mp3")
+            pygame.mixer.music.load("Sounds/MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
             global victorycounter
@@ -168,11 +165,11 @@ def front_raise_curscene():
 
 def military_press_cutscene():
     pygame.mixer.music.stop()
-    pygame.mixer.music.load("Military.mp3")
+    pygame.mixer.music.load("Sounds/Military.mp3")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
 
-    font = pygame.font.Font("pictochat.otf", 48)
+    font = pygame.font.Font("Fonts/pictochat.otf", 48)
 
     messages = [
         "YOOOO you think you got what it takes to out lift me fooo",
@@ -220,7 +217,7 @@ def military_press_cutscene():
                 screen.blit(line_surface, (rect_x + 5, rect_y + 5 + i * font.get_height()))
         else:
             pygame.mixer.music.stop()
-            pygame.mixer.music.load("MENU.mp3")
+            pygame.mixer.music.load("Sounds/MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
             # pygame.mixer.Sound.set_volume(VICTORY, 0.5)
@@ -242,11 +239,11 @@ def military_press_cutscene():
 
 def bicep_curl_cutscene():
     pygame.mixer.music.stop()
-    pygame.mixer.music.load("red.mp3")
+    pygame.mixer.music.load("Sounds/red.mp3")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
     
-    font = pygame.font.Font("pictochat.otf", 48)
+    font = pygame.font.Font("Fonts/pictochat.otf", 48)
     
     messages = [
         "You must be the new guy, I've been hearing about!?",
@@ -296,7 +293,7 @@ def bicep_curl_cutscene():
             
             pygame.mixer.music.stop()
             start_bicep_curl_pose(shared_camera, shared_mp_pose)
-            pygame.mixer.music.load("MENU.mp3")
+            pygame.mixer.music.load("Sounds/MENU.mp3")
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
             # pygame.mixer.Sound.set_volume(VICTORY2, 0.5)
@@ -318,12 +315,12 @@ def bicep_curl_cutscene():
                     pygame.mixer.Sound.play(TEXT)
                     
 def start_bicep_curl_pose(camera, pose):
-    pygame.mixer.music.load("CAMERA.mp3")
+    pygame.mixer.music.load("Sounds/CAMERA.mp3")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
 
-    good_sound = pygame.mixer.Sound("GOOD.mp3")
-    bad_sound = pygame.mixer.Sound("MISS.mp3")
+    good_sound = pygame.mixer.Sound("Sounds/GOOD.mp3")
+    bad_sound = pygame.mixer.Sound("Sounds/MISS.mp3")
     right_tip = ""
     left_tip = ""
 
@@ -334,7 +331,7 @@ def start_bicep_curl_pose(camera, pose):
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Bicep Curl Tracker")
 
-    font = pygame.font.Font("pictochat.otf", 30)
+    font = pygame.font.Font("Fonts/pictochat.otf", 30)
 
     def draw_text(surface, text, pos, color=(255, 255, 255)):
         img = font.render(text, True, color)
@@ -738,7 +735,7 @@ def finalboss():
 
 def show_loading_screen(message="Loading camera and pose model..."):
     screen.fill((0, 0, 0))
-    font = pygame.font.Font("pictochat.otf", 40)
+    font = pygame.font.Font("Fonts/pictochat.otf", 40)
     text_surface = font.render(message, True, (255, 255, 255))
     text_rect = text_surface.get_rect(center=(width // 2, height // 2))
     screen.blit(text_surface, text_rect)
@@ -757,7 +754,7 @@ except Exception as e:
 shared_mp_pose = mp.solutions.pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7)
 # start_front_raise_pose(shared_camera, shared_mp_pose)
 
-pygame.mixer.music.load("MENU.mp3")
+pygame.mixer.music.load("Sounds/MENU.mp3")
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1)
 pygame.mixer.Sound.set_volume(PICK, 0.3)
@@ -791,12 +788,12 @@ while running:
     if military_button.draw(screen):
         print("Military Press")
         pygame.mixer.Sound.play(OPENSOUND)
-        military_press_cutscene()
+        # military_press_cutscene()
 
     if front_button.draw(screen):
         print("FrontRaise")
         pygame.mixer.Sound.play(OPENSOUND)
-        front_raise_curscene()
+        # front_raise_curscene()
 
     # if victorycounter == 3:
     #     finalboss()
