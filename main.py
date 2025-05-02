@@ -63,7 +63,6 @@ REDSTANDING2 = load_and_scale("Resource/redd.jpeg")
 LUSTANDING1 = load_and_scale("Resource/raises1.jpeg")
 LUSTANDING2 = load_and_scale("Resource/raises2.jpeg")
 
-
 center_x = (800 - BUTTON1.get_width()) // 2
 
 bicep_curls = button.Button(center_x, 200, BUTTON1, 0.8, hover_image=BUTTON2)
@@ -73,13 +72,27 @@ front_button = button.Button(center_x, 200 + BUTTON1.get_height() + 80, BUTTON5,
 scroll = 0
 tiles = math.ceil(width / BACKGROUND.get_width()) + 1
 
+def show_countdown(screen, font, duration=3, width=800, height=600):
+    start_time = pygame.time.get_ticks()
+    while pygame.time.get_ticks() - start_time < duration * 1000:
+        screen.fill((0, 0, 0))
+        elapsed = (pygame.time.get_ticks() - start_time) // 1000
+        remaining = duration - elapsed
+        countdown_text = font.render(f"Get Ready: {remaining}", True, (255, 255, 255))
+        screen.blit(countdown_text, (width // 2 - countdown_text.get_width() // 2,
+                                     height // 2 - countdown_text.get_height() // 2))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
 def sanitize_username(name):
     name = name.strip()
     name = name[:20]
     name = re.sub(r'[^a-zA-Z0-9 ]', '', name)
     return name
     
-
 def submit_score(username, goodrepright, badrepright, goodrepleft, badrepleft):
     url = "https://ethanevirs.cikeys.com/submit_reps.php"  
 
@@ -422,6 +435,7 @@ def start_bicep_curl_pose(camera, pose):
     camera_x, camera_y = 50, 50
 
     running = True
+    show_countdown(screen, font, duration=5, width=800, height=600)
     while running:
         ret, frame = camera.cam.read()
         if not ret:
