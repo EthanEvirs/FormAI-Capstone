@@ -8,6 +8,7 @@ import mediapipe as mp
 import numpy as np
 import requests
 import re
+import json
 from camera import Camera
 
 #supervised learning model
@@ -44,6 +45,27 @@ def load_and_scale(path, scale=2):
     img = pygame.image.load(path).convert_alpha()
     img_width, img_height = img.get_size()
     return pygame.transform.scale(img, (int(img_width * scale), int(img_height * scale)))
+
+def submit_full_session(username, goodrepright, badrepright, goodrepleft, badrepleft, reps_data, exercise_type="bicep_curl"):
+    url = "https://ethanevirs.cikeys.com/submit_full_session.php"
+
+    session_payload = {
+        "username": username.strip(),
+        "exercise_type": exercise_type,
+        "score": goodrepright + goodrepleft,
+        "good_reps_right": goodrepright,
+        "bad_reps_right": badrepright,
+        "good_reps_left": goodrepleft,
+        "bad_reps_left": badrepleft,
+        "data": reps_data
+    }
+
+    try:
+        response = requests.post(url, json=session_payload)
+        print("Server response:", response.text)
+    except requests.exceptions.RequestException as e:
+        print("Failed to submit session data:", e)
+
 
 #IMAGES
 INTROBACKGROUND = load_and_scale("Resource/INTROBACKGROUND.jpeg")
@@ -411,6 +433,7 @@ def start_bicep_curl_pose(camera, pose):
     pygame.mixer.music.load("Sounds/CAMERA.mp3")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
+    rep_details = []
 
     good_sound = pygame.mixer.Sound("Sounds/GOOD.mp3")
     bad_sound = pygame.mixer.Sound("Sounds/MISS.mp3")
@@ -490,6 +513,12 @@ def start_bicep_curl_pose(camera, pose):
                         right_tip = f"Curl higher! {int(right_angle)}"
                     else:
                         right_tip = ""
+                
+                rep_details.append({
+                    "arm": "right",
+                    "angle": right_angle,
+                    "label": right_feedback
+                })
                 feedback_timer = pygame.time.get_ticks()
 
             l_shoulder = [landmarks[11].x, landmarks[11].y]
@@ -517,6 +546,12 @@ def start_bicep_curl_pose(camera, pose):
                         left_tip = f"Curl higher! {int(left_angle)}"
                     else:
                         left_tip = ""
+                
+                rep_details.append({
+                    "arm": "left",
+                    "angle": left_angle,
+                    "label": left_feedback
+                })
                 feedback_timer = pygame.time.get_ticks()
 
             right_color = (0, 255, 0) if 40 <= right_angle <= 180 else (255, 0, 0)
@@ -585,6 +620,7 @@ def start_bicep_curl_pose(camera, pose):
             
             display_score(screen, font, score)
             submit_score(username, goodrepright, badrepright, goodrepleft, badrepleft)
+            submit_full_session(username, goodrepright, badrepright, goodrepleft, badrepleft, rep_details)
             goodrepright = badrepright = goodrepleft = badrepleft = 0
             return
 
