@@ -6,6 +6,8 @@ import os
 import cv2
 import mediapipe as mp
 import numpy as np
+import requests
+import re
 from camera import Camera
 
 #supervised learning model
@@ -30,6 +32,11 @@ TEXT = pygame.mixer.Sound("Sounds/text.wav")
 # VICTORY2 = pygame.mixer.Sound("WIN2.mp3")
 
 victorycounter = 0
+goodrepright = 0
+badrepright = 0
+goodrepleft = 0
+badrepleft = 0
+username = ""
 
 def load_and_scale(path, scale=2):
     img = pygame.image.load(path).convert_alpha()
@@ -66,6 +73,29 @@ front_button = button.Button(center_x, 200 + BUTTON1.get_height() + 80, BUTTON5,
 scroll = 0
 tiles = math.ceil(width / BACKGROUND.get_width()) + 1
 
+def sanitize_username(name):
+    name = name.strip()
+    name = name[:20]
+    name = re.sub(r'[^a-zA-Z0-9 ]', '', name)
+    return name
+    
+
+def submit_score(username, goodrepright, badrepright, goodrepleft, badrepleft):
+    url = "https://ethanevirs.cikeys.com/submit_reps.php"  
+
+    data = {
+        'username': username,
+        'good_reps_right': goodrepright,
+        'bad_reps_right': badrepright,
+        'good_reps_left': goodrepleft,
+        'bad_reps_left': badrepleft
+    }
+
+    try:
+        response = requests.post(url, data=data)
+        print("Server response:", response.text)
+    except requests.exceptions.RequestException as e:
+        print("Failed to submit score:", e)
 
 def show_start_menu():
     pygame.mixer.music.load("Sounds/INTRO.mp3")
@@ -242,29 +272,30 @@ def bicep_curl_cutscene():
     pygame.mixer.music.load("Sounds/red.mp3")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
-    
+    global username
+
     font = pygame.font.Font("Fonts/pictochat.otf", 48)
-    
+    small_font = pygame.font.Font("Fonts/pictochat.otf", 24)  
+
     messages = [
-        "You must be the new guy, I've been hearing about!?",
-        "Say new guy you think you have what it takes to hit 8 perfect reps",
-        "Most fresh meat cant get past 2 hahahah.",
-        "I'd like to see you try!"
+        "You must be the new guy I've been hearing about!?",
+        "Say new guy, you think you have what it takes to hit 8 perfect reps?",
     ]
-    
+
     message_index = 0
-    space_press_count = 0  # Count number of space presses
-    
-    # Add your animation frames here
+    space_press_count = 0
+
     red_frames = [REDSTANDING1, REDSTANDING2]
     rect_x, rect_y, rect_w, rect_h = 110, 544, 600, 128
-    
-    
+
+    input_text = ""
+    input_rect = pygame.Rect(rect_x + 10, rect_y + 60, 580, 50)
+    input_color = pygame.Color("white")
+
     def wrap_text(text, font, max_width):
         words = text.split(' ')
         lines = []
         current_line = ""
-    
         for word in words:
             test_line = current_line + word + " "
             if font.size(test_line)[0] <= max_width:
@@ -274,45 +305,79 @@ def bicep_curl_cutscene():
                 current_line = word + " "
         lines.append(current_line.strip())
         return lines
-    
+
     while True:
-        screen.fill((0,0,0))
-    
-        # Pick the current MIL frame based on space_press_count // 2
+        screen.fill((0, 0, 0))
         current_frame_index = min(space_press_count // 2, len(red_frames) - 1)
         screen.blit(red_frames[current_frame_index], (0, 0))
-    
-        pygame.draw.rect(screen, (172,50,50), (rect_x, rect_y, rect_w, rect_h))
-    
-        if message_index < len(messages):
+
+        pygame.draw.rect(screen, (172, 50, 50), (rect_x, rect_y, rect_w, rect_h))
+
+        if message_index < len(messages):  # Phase 0: Intro lines
             wrapped_lines = wrap_text(messages[message_index], font, rect_w - 10)
             for i, line in enumerate(wrapped_lines):
                 line_surface = font.render(line, True, (0, 0, 0))
                 screen.blit(line_surface, (rect_x + 5, rect_y + 5 + i * font.get_height()))
-        else:
-            
-            pygame.mixer.music.stop()
-            start_bicep_curl_pose(shared_camera, shared_mp_pose)
-            pygame.mixer.music.load("Sounds/MENU.mp3")
-            pygame.mixer.music.set_volume(0.5)
-            pygame.mixer.music.play(-1)
-            # pygame.mixer.Sound.set_volume(VICTORY2, 0.5)
-            # pygame.mixer.Sound.play(VICTORY2)
-            
-            return
-    
+        elif message_index == len(messages):  # Phase 1: Ask for name
+            # Character speaking
+            question_surface = font.render("Say new guy, what's your name?", True, (0, 0, 0))
+            screen.blit(question_surface, (rect_x + 5, rect_y + 5))
+
+            # Prompt
+            prompt_surface = small_font.render("Enter your name:", True, (255, 255, 255))
+            screen.blit(prompt_surface, (input_rect.x, input_rect.y - 20))
+
+            # Input box
+            pygame.draw.rect(screen, input_color, input_rect, 2)
+            text_surface = font.render(input_text, True, (255, 255, 255))
+            screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+        elif message_index == len(messages) + 1:  # Phase 2: Name acknowledgment
+            greet = f"{username}, huh? Let's see what you got!"
+            wrapped_lines = wrap_text(greet, font, rect_w - 10)
+            for i, line in enumerate(wrapped_lines):
+                line_surface = font.render(line, True, (0, 0, 0))
+                screen.blit(line_surface, (rect_x + 5, rect_y + 5 + i * font.get_height()))
+        elif message_index == len(messages) + 2:  # Phase 3: Final message
+            final_msg = "Let's get it!"
+            line_surface = font.render(final_msg, True, (0, 0, 0))
+            screen.blit(line_surface, (rect_x + 5, rect_y + 5))
+
         pygame.display.flip()
-    
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    message_index += 1
-                    space_press_count += 1  # Only increment by 1
-                    pygame.mixer.Sound.set_volume(TEXT, 0.8)
-                    pygame.mixer.Sound.play(TEXT)
+                if message_index < len(messages):  # Advance intro lines
+                    if event.key == pygame.K_SPACE:
+                        message_index += 1
+                        space_press_count += 1
+                        pygame.mixer.Sound.set_volume(TEXT, 0.8)
+                        pygame.mixer.Sound.play(TEXT)
+                elif message_index == len(messages):  # Name input
+                    if event.key == pygame.K_RETURN:
+                        if input_text.strip():
+                            username = input_text.strip()
+                            message_index += 1  # Move to greeting
+                    elif event.key == pygame.K_BACKSPACE:
+                        input_text = input_text[:-1]
+                    else:
+                        if len(input_text) < 20:
+                            input_text += event.unicode
+                elif message_index == len(messages) + 1:  # Greet
+                    if event.key == pygame.K_RETURN:
+                        message_index += 1
+                elif message_index == len(messages) + 2:  # Final "Let's get it!"
+                    if event.key == pygame.K_RETURN:
+                        pygame.mixer.music.stop()
+                        username = sanitize_username(username)
+                        print(username)
+                        start_bicep_curl_pose(shared_camera, shared_mp_pose)
+                        pygame.mixer.music.load("Sounds/MENU.mp3")
+                        pygame.mixer.music.set_volume(0.5)
+                        pygame.mixer.music.play(-1)
+                        return
                     
 def start_bicep_curl_pose(camera, pose):
     pygame.mixer.music.load("Sounds/CAMERA.mp3")
@@ -323,6 +388,7 @@ def start_bicep_curl_pose(camera, pose):
     bad_sound = pygame.mixer.Sound("Sounds/MISS.mp3")
     right_tip = ""
     left_tip = ""
+    global goodrepright, goodrepleft, badrepleft, badrepright
 
     # camera = Camera()
     mp_pose = mp.solutions.pose
@@ -389,10 +455,12 @@ def start_bicep_curl_pose(camera, pose):
                 if 40 <= right_angle <= 180:
                     right_counter += 1
                     right_feedback = "GOOD"
+                    goodrepright += 1
                     good_sound.play()
                     right_tip = ""  # Clear any previous hint when a GOOD rep happens
                 else:
                     right_feedback = "BAD"
+                    badrepright += 1
                     bad_sound.play()
                     # Give feedback tips if BAD rep (only when feedback is BAD)
                     if right_angle > 130:
@@ -418,10 +486,12 @@ def start_bicep_curl_pose(camera, pose):
                 if 40 <= left_angle <= 180:
                     left_counter += 1
                     left_feedback = "GOOD"
+                    goodrepleft += 1
                     good_sound.play()
                     left_tip = ""  # Clear previous hint on GOOD rep
                 else:
                     left_feedback = "BAD"
+                    badrepleft += 1
                     bad_sound.play()
                     # Provide feedback tips for BAD rep
                     if left_angle > 130:
@@ -516,6 +586,11 @@ def start_bicep_curl_pose(camera, pose):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             screen = pygame.display.set_mode((800, 800))
+            submit_score(username, goodrepright, badrepright, goodrepleft, badrepleft)
+            goodrepright = 0
+            badrepright = 0
+            goodrepleft = 0
+            badrepleft = 0
             return
 
 def start_front_raise_pose(camera, pose):
@@ -740,6 +815,7 @@ def show_loading_screen(message="Loading camera and pose model..."):
     text_rect = text_surface.get_rect(center=(width // 2, height // 2))
     screen.blit(text_surface, text_rect)
     pygame.display.flip()
+
 
 show_start_menu()
 show_loading_screen()
