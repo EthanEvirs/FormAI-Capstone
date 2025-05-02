@@ -18,6 +18,7 @@
 > Coming soon — check out the project in action!
 
 ### 🔗 Links
+- [Live Site](https://ethanevirs.cikeys.com/Capstone)
 - [Leaderboard](https://ethanevirs.cikeys.com/leaderboard.php)
 ---
 
